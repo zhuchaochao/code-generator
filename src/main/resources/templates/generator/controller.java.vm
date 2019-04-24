@@ -1,0 +1,192 @@
+package ${package.Controller};
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ctsy.microservice.core.model.APIResponse;
+import com.ctsy.microservice.apidoc.annotation.Api;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+
+
+import ${package.Entity}.${entity};
+import ${package.Service}.${table.serviceName};
+
+import lombok.extern.slf4j.Slf4j;
+
+#if(${restControllerStyle})
+import org.springframework.web.bind.annotation.RestController;
+#else
+import org.springframework.stereotype.Controller;
+#end
+#if(${superControllerClassPackage})
+import ${superControllerClassPackage};
+#end
+
+#foreach($field in ${table.fields})
+#if(${field.keyIdentityFlag})
+#set($keyFieldType="${field.propertyType}")
+#break
+#end
+#end
+
+	#if(${field.propertyType.equals("Boolean")})
+		#set($value="布尔型")
+	#end	
+	#if(${field.propertyType.equals("LocalDate")})
+		#set($value="日期年月日")
+	#end
+	#if(${field.propertyType.equals("LocalDateTime")})
+		#set($value="日期年月日时分秒")
+	#end
+	#if(${field.propertyType.equals("Long")})
+		#set($value="整数")
+	#end
+	#if(${field.propertyType.equals("Integer")})
+		#set($value="整数")
+	#end
+	#if(${field.propertyType.equals("BigDecimal")})
+		#set($value="小数")
+	#end
+	#if(${field.propertyType.equals("Decimal")})
+		#set($value="小数")
+	#end
+	#if(${field.propertyType.equals("Float")})
+		#set($value="小数")
+	#end
+	#if(${field.propertyType.equals("Double")})
+		#set($value="小数")
+	#end
+	#if(${field.propertyType.equals("String")})
+		#set($value="字符串")	
+	#end
+
+/**
+ * @author ${author}
+ * @date ${date}
+ */
+@Api("$!{table.comment}API接口")
+@Slf4j
+#if(${restControllerStyle})
+@RestController
+#else
+@Controller
+#end
+@RequestMapping("#if(${package.ModuleName})/${package.ModuleName}#end")
+public class ${table.controllerName} {
+	@Autowired
+	${table.serviceName} ${table.entityPath}Service;
+	
+	
+	/**
+	 * @name 新增${table.entityPath}
+	 * @desc
+	 * @param ${table.entityPath}|实体对象|true
+	 * @return APIResponse的JSON对象
+	 */
+	@PostMapping("/${table.entityPath}")
+	public APIResponse<${entity}> insert(@Validated(InsertGroup.class) @RequestBody ${entity} ${table.entityPath}) {
+		boolean result=${table.entityPath}Service.save(${table.entityPath});
+		if(result) {
+			return APIResponse.success("新增成功",${table.entityPath});
+		}
+		return APIResponse.serviceError();	
+	}
+	
+
+	/**
+	 * @name 更新${table.entityPath}
+	 * @desc
+	 * @param ${table.entityPath}|实体对象|true
+	 * @return APIResponse的JSON对象
+	 */
+	@PutMapping("/${table.entityPath}")
+	public  APIResponse<${entity}> update(@Validated(UpdateGroup.class) @RequestBody ${entity} ${table.entityPath}) {
+		Boolean result=${table.entityPath}Service.saveOrUpdate(${table.entityPath});
+		
+		if(result) {
+			return APIResponse.success("更新成功",${table.entityPath});
+		}
+		return APIResponse.serviceError();
+	}
+	
+	/**
+	 * @name 按多个id删除${table.entityPath}
+	 * @desc
+	 * @param ids|${value}数组|true	
+	 * @return APIResponse的JSON对象
+	 */
+	@DeleteMapping("/${table.entityPath}s")
+	public APIResponse delete(@RequestBody ${keyFieldType}[] ids) {		
+		Boolean result=${table.entityPath}Service.removeByIds(Arrays.asList(ids));
+		
+		if(result) {
+			return APIResponse.success("删除成功");
+		}
+		return APIResponse.serviceError();		
+	}
+	
+	/**
+	 * @name 按id查询单个${table.entityPath}
+	 * @desc
+	 * @param id|${value}|true
+	 * @return APIResponse的JSON对象
+	 */
+	@GetMapping("/${table.entityPath}")
+	public APIResponse<${entity}> query${entity}(${keyFieldType} id) {		
+		 ${entity} result=${table.entityPath}Service.getById(id);
+		return APIResponse.success("执行成功",result);
+	}
+	
+	/**
+	 * @name 按条件查询多个${table.entityPath}
+	 * @desc
+	 * @param ${table.entityPath}|查询条件对象	
+	 * @return APIResponse的JSON对象
+	 */
+	@GetMapping("/${table.entityPath}s")
+	public APIResponse<List<${entity}>> query${entity}s(${entity} ${table.entityPath}) {
+		QueryWrapper<${entity}>  query = new QueryWrapper<>(${table.entityPath});
+		//query.like("name", "测试");
+		//${table.entityPath}.setName(null);
+		List<${entity}> result=${table.entityPath}Service.list(query);
+		
+		return APIResponse.success("执行成功",result);
+	}
+	
+	/**
+	 * @name 按条件分頁查詢多个${table.entityPath}
+	 * @desc
+	 * @param ${table.entityPath}|查询条件对象
+	 * @param curPage|当前页码|true
+	 * @param prePage|每页条数
+	 * @return APIResponse的JSON对象
+	 */
+	@GetMapping("/${table.entityPath}s/page/curPage")
+	public APIResponse<IPage<${entity}>> query${entity}sByPage(${entity} ${table.entityPath},@PathVariable @RequestParam(defaultValue="1") Integer curPage, @RequestParam(defaultValue="10") Integer prePage) {
+		QueryWrapper< ${entity}>  query = new QueryWrapper<>(${table.entityPath});
+		//query.like("name", "测试");
+		//${table.entityPath}.setName(null);
+		Page<${entity}> page = new Page<>(curPage,prePage);
+		IPage<${entity}> result=${table.entityPath}Service.page(page,query);		
+		return APIResponse.success("执行成功",result);
+	}
+
+
+}
+

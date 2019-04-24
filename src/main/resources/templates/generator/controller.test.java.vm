@@ -1,0 +1,132 @@
+package ${package.Controller};
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+
+import com.alibaba.fastjson.JSONObject;
+import ${package.Entity}.${entity};
+import ${package.Service}.${table.serviceName};
+
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * $!{table.comment}测试类
+ * @author ${author}
+ * @date ${date}
+ */
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@Slf4j
+@AutoConfigureMockMvc
+public class ${entity}ControllerTests {	
+		@Autowired
+		private MockMvc mvc;
+			
+		@Autowired
+		${table.serviceName} ${table.entityPath}Service;
+		 
+		/**
+		 * service单元测试
+		 */
+		@Test 
+		public void ${table.entityPath}ServiceTest_1() { 
+			 Assert.assertSame("測試失敗",${table.entityPath}Service.count(), 1);		 
+		}
+
+		/**
+		 * controller单元测试
+		 */
+		@Test
+		public void exampleTest() throws Exception {
+			this.mvc.perform(get("/info")).andExpect(status().isOk())
+					.andExpect(content().string("hello ,demo null!"))
+	                .andDo(MockMvcResultHandlers.print());
+		} 
+		
+		/**
+		 * controller单元测试（表单form提交方式）
+		 */
+		@Test
+		public void postFormTest() throws Exception {			
+			this.mvc.perform(MockMvcRequestBuilders.post("/test")
+					.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+					.param("name", "奇safasf")
+					.param("age", "20")
+					.param("createTime", "2019-12-12 12:20:30"))
+					.andExpect(status().isOk())
+					.andExpect(content().string("1"))
+	                .andDo(MockMvcResultHandlers.print());
+		}
+		
+		/**
+		 * controller单元测试（json提交方式）
+		 */
+		@Test
+		public void postJsonTest() throws Exception {
+			${entity} ${table.entityPath} = new ${entity}();			
+    //设置请求参数
+	//${table.entityPath}.setName("單元測試");			
+	#foreach($field in ${table.fields})
+	#if(${field.keyFlag})
+	#set($keyFieldType=${field.propertyType})
+	#end
+	#if(${field.propertyType.equals("Boolean")})
+	#set($value="true")
+	#end	
+	#if(${field.propertyType.equals("LocalDate")})
+	#set($value="LocalDate.now()")
+	#end
+	#if(${field.propertyType.equals("LocalDateTime")})
+	#set($value="LocalDateTime.now()")
+	#end
+	#if(${field.propertyType.equals("Long")})
+	#set($value="100L")
+	#end
+	#if(${field.propertyType.equals("Integer")})
+	#set($value="100")
+	#end
+	#if(${field.propertyType.equals("BigDecimal")})
+	#set($value="100.2")
+	#end
+	#if(${field.propertyType.equals("Decimal")})
+	#set($value="100.2")
+	#end
+	#if(${field.propertyType.equals("Float")})
+	#set($value="100.2")
+	#end
+	#if(${field.propertyType.equals("Double")})
+	#set($value="100.2")
+	#end
+	#if(${field.propertyType.equals("String")})
+	#set($value='"abc"')	
+	#end				
+			${table.entityPath}.set${field.capitalName}(${value});				
+	#end
+			
+			String requestJson = JSONObject.toJSONString(${table.entityPath});
+			
+			this.mvc.perform(MockMvcRequestBuilders.post("/${table.entityPath}")
+					.contentType(MediaType.APPLICATION_JSON_UTF8).content(requestJson))
+					.andExpect(status().isOk())
+					//.andExpect(content().string("200"))
+	                .andDo(MockMvcResultHandlers.print());
+		} 
+	 
+
+}

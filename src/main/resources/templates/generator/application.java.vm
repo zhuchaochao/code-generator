@@ -1,0 +1,29 @@
+package com.ctsy.microservice.${package.ModuleName};
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+
+import org.springframework.context.annotation.ComponentScan;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * $!{table.comment}应用启动类
+ * @author ${author}
+ * @date ${date}
+ */
+ 
+@Slf4j
+@SpringBootApplication
+@EnableDiscoveryClient
+@EnableFeignClients(value= {"com.ctsy.microservice.core.service.feign"})
+@ComponentScan("com.ctsy.microservice,com.wing.pimsa.core")
+@MapperScan("com.ctsy.microservice.*.dao")
+public class ${entity}Application {
+	
+	public static void main(String[] args) {
+		SpringApplication.run(${entity}Application.class, args);
+	}
+}

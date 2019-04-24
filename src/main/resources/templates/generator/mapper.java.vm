@@ -1,0 +1,18 @@
+package ${package.Mapper};
+
+import ${package.Entity}.${entity};
+import ${superMapperClassPackage};
+import lombok.extern.slf4j.Slf4j;
+/**
+ * $!{table.comment} Dao接口
+ * @author ${author}
+ * @date ${date}
+ */
+@Slf4j
+#if(${kotlin})
+interface ${table.mapperName} : ${superMapperClass}<${entity}>
+#else
+public interface ${table.mapperName} extends ${superMapperClass}<${entity}> {
+
+}
+#end
